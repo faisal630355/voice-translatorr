@@ -1,0 +1,56 @@
+import { startRecording, stopRecording } from './recorder.js';
+import { translateAndSynthesize } from './translation.js';
+
+const recordBtn = document.getElementById('record-btn');
+const languageSelect = document.getElementById('language-select');
+const originalTextElement = document.getElementById('original-text');
+const translatedTextElement = document.getElementById('translated-text');
+const emotionIndicator = document.getElementById('emotion-indicator');
+const translationAudio = document.getElementById('translation-audio');
+
+let isRecording = false;
+let selectedLanguage = languageSelect.value;
+
+languageSelect.addEventListener('change', () => {
+  selectedLanguage = languageSelect.value;
+});
+
+recordBtn.addEventListener('click', async () => {
+  if (!isRecording) {
+    try {
+      await startRecording(selectedLanguage, (transcript) => {
+        originalTextElement.textContent = transcript;
+        translateAndSynthesize(transcript, selectedLanguage)
+          .then(({ translatedText, audioUrl, emotion }) => {
+            translatedTextElement.textContent = translatedText;
+            translationAudio.src = audioUrl;
+            updateEmotionIndicator(emotion);
+          });
+      });
+      recordBtn.classList.add('recording');
+      recordBtn.textContent = 'Stop Recording';
+      isRecording = true;
+    } catch (error) {
+      console.error('Recording error:', error);
+      alert('Error starting recording. Please check microphone permissions.');
+    }
+  } else {
+    stopRecording();
+    recordBtn.classList.remove('recording');
+    recordBtn.textContent = 'Start Recording';
+    isRecording = false;
+  }
+});
+
+function updateEmotionIndicator(emotion) {
+  const colors = {
+    happy: '#f1c40f',
+    sad: '#3498db',
+    angry: '#e74c3c',
+    neutral: '#95a5a6',
+    excited: '#e67e22'
+  };
+  
+  emotionIndicator.style.backgroundColor = colors[emotion] || colors.neutral;
+  emotionIndicator.title = `Detected emotion: ${emotion}`;
+}

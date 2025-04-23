@@ -1,0 +1,52 @@
+const API_BASE_URL = 'http://localhost:3000/api';
+
+export async function translateAndSynthesize(text, sourceLanguage) {
+  try {
+    // Step 1: Send to backend for translation and emotion analysis
+    const response = await fetch(`${API_BASE_URL}/translate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        sourceLanguage,
+        targetLanguage: 'en'
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Translation failed');
+    }
+
+    const { translatedText, emotion } = await response.json();
+
+    // Step 2: Get audio synthesis
+    const audioResponse = await fetch(`${API_BASE_URL}/tts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: translatedText,
+        emotion
+      })
+    });
+
+    if (!audioResponse.ok) {
+      throw new Error('Audio synthesis failed');
+    }
+
+    const audioBlob = await audioResponse.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    return {
+      translatedText,
+      audioUrl,
+      emotion
+    };
+  } catch (error) {
+    console.error('Translation error:', error);
+    throw error;
+  }
+}

@@ -1,0 +1,29 @@
+const express = require('express');
+const router = express.Router();
+const { translate } = require('@vitalets/google-translate-api');
+const { detectEmotion } = require('../utils/emotionDetection');
+
+router.post('/', async (req, res) => {
+  try {
+    const { text, sourceLanguage, targetLanguage } = req.body;
+
+    // Step 1: Translate the text
+    const translation = await translate(text, {
+      from: sourceLanguage,
+      to: targetLanguage
+    });
+
+    // Step 2: Detect emotion from original text
+    const emotion = await detectEmotion(text, sourceLanguage);
+
+    res.json({
+      translatedText: translation.text,
+      emotion
+    });
+  } catch (error) {
+    console.error('Translation error:', error);
+    res.status(500).json({ error: 'Translation failed' });
+  }
+});
+
+module.exports = router;

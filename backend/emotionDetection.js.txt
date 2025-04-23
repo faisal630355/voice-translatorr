@@ -1,0 +1,33 @@
+// Simple emotion detection based on keywords
+// In a real app, you'd use a proper NLP model or API
+async function detectEmotion(text, language) {
+  // This is a simplified version - you'd want a more sophisticated approach
+  const emotionKeywords = {
+    'hi-IN': {
+      happy: ['खुश', 'आनंद', 'मजा'],
+      sad: ['दुख', 'उदास', 'निराश'],
+      angry: ['गुस्सा', 'क्रोध', 'नाराज'],
+      excited: ['उत्साह', 'उत्तेजित', 'जोश']
+    },
+    'en': {
+      happy: ['happy', 'joy', 'fun'],
+      sad: ['sad', 'upset', 'depressed'],
+      angry: ['angry', 'mad', 'furious'],
+      excited: ['excited', 'thrilled', 'pumped']
+    }
+    // Add more languages as needed
+  };
+
+  const keywords = emotionKeywords[language] || emotionKeywords.en;
+  const lowerText = text.toLowerCase();
+
+  for (const [emotion, words] of Object.entries(keywords)) {
+    if (words.some(word => lowerText.includes(word))) {
+      return emotion;
+    }
+  }
+
+  return 'neutral';
+}
+
+module.exports = { detectEmotion };

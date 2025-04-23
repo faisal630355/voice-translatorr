@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotion-Preserving Voice Translator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Real-Time Voice Translator</h1>
+    
+    <div class="controls">
+      <select id="language-select">
+        <option value="hi-IN">Hindi</option>
+        <option value="ta-IN">Tamil</option>
+        <option value="te-IN">Telugu</option>
+        <option value="kn-IN">Kannada</option>
+        <option value="ml-IN">Malayalam</option>
+        <option value="ur-PK">Urdu</option>
+      </select>
+      
+      <button id="record-btn" class="btn">Start Recording</button>
+    </div>
+    
+    <div class="output-container">
+      <div class="output-box">
+        <h3>Original Speech</h3>
+        <div id="original-text" class="text-output"></div>
+        <div id="emotion-indicator"></div>
+      </div>
+      
+      <div class="output-box">
+        <h3>English Translation</h3>
+        <div id="translated-text" class="text-output"></div>
+        <audio id="translation-audio" controls></audio>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+const express = require('express');
+const router = express.Router();
+const ElevenLabs = require('elevenlabs-node');
+const fs = require('fs');
+const path = require('path');
+
+const voice = new ElevenLabs({
+  apiKey: process.env.ELEVENLABS_API_KEY,
+  voiceId: process.env.ELEVENLABS_VOICE_ID
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const { text, emotion } = req.body;
+    
+    // Configure voice settings based on emotion
+    const voiceSettings = {
+      stability: 0.5,
+      similarityBoost: 0.8,
+      ...getEmotionSettings(emotion)
+    };
+
+    // Generate speech
+    const audioFile = path.join(__dirname, '../../temp/audio.mp3');
+    await voice.textToSpeech({
+      fileName: audioFile,
+      textInput: text,
+      voiceId: process.env.ELEVENLABS_VOICE_ID,
+      stability: voiceSettings.stability,
+      similarityBoost: voiceSettings.similarityBoost
+    });
+
+    // Stream the audio back
+    const audioStream = fs.createReadStream(audioFile);
+    res.setHeader('Content-Type', 'audio/mpeg');
+    audioStream.pipe(res);
+    
+    // Clean up after streaming
+    audioStream.on('end', () => {
+      fs.unlinkSync(audioFile);
+    });
+  } catch (error) {
+    console.error('TTS error:', error);
+    res.status(500).json({ error: 'Audio synthesis failed' });
+  }
+});
+
+function getEmotionSettings(emotion) {
+  const settings = {
+    happy: { stability: 0.3, similarityBoost: 0.9 },
+    sad: { stability: 0.7, similarityBoost: 0.7 },
+    angry: { stability: 0.2, similarityBoost: 0.8 },
+    neutral: { stability: 0.5, similarityBoost: 0.8 },
+    excited: { stability: 0.1, similarityBoost: 0.9 }
+  };
+  return settings[emotion] || settings.neutral;
+}
+
+module.exports = router;
